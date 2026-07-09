@@ -107,6 +107,38 @@ interface Translations {
   footerTerms: string;
   footerSwitchToAr: string;
   footerSwitchToEn: string;
+  // Pay link page
+  payOrderDetails: string;
+  paySecuredBy: string;
+  payCompletePayment: string;
+  paySelectMethod: string;
+  payCard: string;
+  payPayPal: string;
+  payApplePay: string;
+  payBankTransfer: string;
+  payEmail: string;
+  payEmailError: string;
+  payCardNumber: string;
+  payNameOnCard: string;
+  payExpiry: string;
+  payCvc: string;
+  payNow: string;
+  payCancel: string;
+  payProcessing: string;
+  paySuccessTitle: string;
+  paySuccessDesc: string;
+  payBackHome: string;
+  payNotFound: string;
+  payNotFoundDesc: string;
+  payPayPalDesc: string;
+  payApplePayDesc: string;
+  payBankName: string;
+  payBankIban: string;
+  payBankRef: string;
+  payBankNote: string;
+  payMerchant: string;
+  payAmount: string;
+  payDescription: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -211,6 +243,37 @@ const translations: Record<Language, Translations> = {
     footerTerms: "Terms",
     footerSwitchToAr: "Arabic",
     footerSwitchToEn: "English",
+    payOrderDetails: "Order details",
+    paySecuredBy: "Secured by MMNPAY",
+    payCompletePayment: "Complete your payment",
+    paySelectMethod: "Payment method",
+    payCard: "Card",
+    payPayPal: "PayPal",
+    payApplePay: "Apple Pay",
+    payBankTransfer: "Bank Transfer",
+    payEmail: "Email address",
+    payEmailError: "Please enter a valid email address",
+    payCardNumber: "Card number",
+    payNameOnCard: "Name on card",
+    payExpiry: "Expiry",
+    payCvc: "CVC",
+    payNow: "Pay now",
+    payCancel: "Cancel",
+    payProcessing: "Processing...",
+    paySuccessTitle: "Payment complete",
+    paySuccessDesc: "Your payment was processed successfully.",
+    payBackHome: "Back to home",
+    payNotFound: "Payment link not found",
+    payNotFoundDesc: "This payment link is invalid or has expired.",
+    payPayPalDesc: "You'll be redirected to PayPal to complete your purchase securely.",
+    payApplePayDesc: "Tap the button below to complete your purchase with Apple Pay.",
+    payBankName: "Bank name",
+    payBankIban: "IBAN",
+    payBankRef: "Reference",
+    payBankNote: "Include the reference number with your transfer.",
+    payMerchant: "Merchant",
+    payAmount: "Amount",
+    payDescription: "Description",
   },
   ar: {
     navProducts: "المنتجات",

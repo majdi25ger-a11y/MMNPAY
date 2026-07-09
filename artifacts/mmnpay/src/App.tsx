@@ -4,6 +4,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import Home from '@/pages/Home';
 import Checkout from '@/pages/Checkout';
+import Pay from '@/pages/Pay';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/lib/language';
 
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/pay/:id" component={Pay} />
       <Route component={NotFound} />
     </Switch>
   );
