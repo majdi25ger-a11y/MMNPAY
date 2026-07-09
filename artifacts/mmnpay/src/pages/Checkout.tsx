@@ -7,13 +7,15 @@ import { SiVisa, SiMastercard, SiPaypal } from 'react-icons/si';
 import { Link } from 'wouter';
 
 export default function Checkout() {
-  const { lang, t } = useLang();
+  const { lang, t, toggleLang } = useLang();
   
   const [activeTab, setActiveTab] = useState<'card' | 'bank' | 'paypal'>('card');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState(false);
   const [isCvcFocused, setIsCvcFocused] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -46,6 +48,11 @@ export default function Checkout() {
 
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError(true);
+      return;
+    }
+    setEmailError(false);
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
@@ -69,10 +76,10 @@ export default function Checkout() {
           >
             <CheckCircle2 size={40} />
           </motion.div>
-          <h2 className="text-2xl font-bold text-[#0a2540] mb-2">Payment Successful</h2>
-          <p className="text-[#425466] mb-8">Thank you for your purchase. A receipt has been sent to your email.</p>
+          <h2 className="text-2xl font-bold text-[#0a2540] mb-2">{t.checkoutSuccessTitle}</h2>
+          <p className="text-[#425466] mb-8">{t.checkoutSuccessDesc}</p>
           <Link href="/" className="inline-block px-8 py-3 bg-[#f6f9fc] text-[#0a2540] font-bold rounded-full hover:bg-gray-200 transition-colors">
-            Return to Home
+            {t.checkoutReturnHome}
           </Link>
         </motion.div>
       </div>
@@ -84,30 +91,50 @@ export default function Checkout() {
       {/* Left Panel - Summary */}
       <div className="lg:w-[40%] bg-[#0a2540] text-white p-8 lg:p-16 flex flex-col justify-between">
         <div>
-          <Link href="/" className="text-2xl font-display font-bold tracking-tight mb-16 inline-block">
-            MMNPAY
-          </Link>
+          <div className="flex justify-between items-center mb-16">
+            <Link href="/" className="text-2xl font-display font-bold tracking-tight inline-block">
+              MMNPAY
+            </Link>
+            <button onClick={toggleLang} className="text-sm font-bold text-white/80 hover:text-white transition-colors">
+              {lang === 'en' ? 'AR' : 'EN'}
+            </button>
+          </div>
 
           <h2 className="text-[#87b1e2] font-semibold text-sm tracking-wider uppercase mb-2">
             {t.checkoutSummary}
           </h2>
           <div className="text-3xl font-display font-bold mb-8">
-            MMNPAY Pro Plan
+            {t.checkoutPlanName}
           </div>
 
           <div className="space-y-4 mb-8">
             <div className="flex justify-between items-center text-[#87b1e2]">
-              <span>Subtotal</span>
+              <span>{t.checkoutSubtotal}</span>
               <span>€95.00</span>
             </div>
             <div className="flex justify-between items-center text-[#87b1e2]">
-              <span>VAT (5%)</span>
+              <span>{t.checkoutVat}</span>
               <span>€5.00</span>
             </div>
             <div className="h-px bg-white/20 my-4"></div>
             <div className="flex justify-between items-center text-xl font-bold">
-              <span>Total</span>
+              <span>{t.checkoutTotal}</span>
               <span>€100.00</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mt-8">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-full text-xs font-medium text-white">
+              <Shield size={12} />
+              {t.checkoutBadge1}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-full text-xs font-medium text-white">
+              <Lock size={12} />
+              {t.checkoutBadge2}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-full text-xs font-medium text-white">
+              <Shield size={12} />
+              {t.checkoutBadge3}
             </div>
           </div>
         </div>
@@ -164,9 +191,15 @@ export default function Checkout() {
                   <input 
                     type="email" 
                     required
-                    className="w-full px-4 py-3 rounded-md border border-[#e6ebf1] focus:border-[#635bff] focus:ring-1 focus:ring-[#635bff] outline-none transition-shadow text-[#0a2540]"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError(false);
+                    }}
+                    className={`w-full px-4 py-3 rounded-md border ${emailError ? 'border-red-500 focus:ring-red-500' : 'border-[#e6ebf1] focus:border-[#635bff] focus:ring-[#635bff]'} focus:ring-1 outline-none transition-shadow text-[#0a2540]`}
                     placeholder="john@example.com"
                   />
+                  {emailError && <p className="text-red-500 text-xs mt-1">{t.checkoutEmailError}</p>}
                 </div>
               </div>
             </div>
@@ -298,7 +331,7 @@ export default function Checkout() {
           </form>
 
           <p className="text-center text-xs text-[#697386] mt-8">
-            Powered by <strong>MMNPAY</strong>
+            {t.checkoutPoweredBy}
           </p>
         </div>
       </div>
