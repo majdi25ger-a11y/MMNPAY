@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MMNPAY - Secure Payments</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f8fafc;
+    color:#111827;
+}
+
+header{
+    background:#0f172a;
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:bold;
+}
+
+nav a{
+    color:white;
+    margin-left:20px;
+    text-decoration:none;
+}
+
+.hero{
+    padding:80px 8%;
+    text-align:center;
+}
+
+.hero h1{
+    font-size:45px;
+    margin-bottom:20px;
+}
+
+.hero span{
+    color:#2563eb;
+}
+
+.hero p{
+    font-size:20px;
+    color:#475569;
+    margin-bottom:35px;
+}
+
+.btn{
+    background:#2563eb;
+    color:white;
+    padding:15px 35px;
+    border-radius:10px;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.section{
+    padding:50px 8%;
+    text-align:center;
+}
+
+.cards{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.card{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    width:280px;
+    box-shadow:0 5px 20px #0001;
+}
+
+.card h3{
+    margin-bottom:15px;
+}
+
+.checkout{
+    background:white;
+    max-width:450px;
+    margin:auto;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 5px 20px #0002;
+}
+
+.payment{
+    padding:15px;
+    border:1px solid #ddd;
+    margin:10px 0;
+    border-radius:10px;
+}
+
+footer{
+    background:#0f172a;
+    color:white;
+    text-align:center;
+    padding:25px;
+    margin-top:40px;
+}
+
+.ar{
+    direction:rtl;
+    margin-top:40px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<div class="logo">MMNPAY</div>
+
+<nav>
+<a href="#">Home</a>
+<a href="#">Payments</a>
+<a href="#">Contact</a>
+</nav>
+
+</header>
+
+
+<section class="hero">
+
+<h1>
+Secure Payments with <span>MMNPAY</span>
+</h1>
+
+<p>
+Simple payment solutions for businesses worldwide.
+</p>
+
+<a class="btn" href="#checkout">
+Start Payment
+</a>
+
+</section>
+
+
+<section class="section">
+
+<h2>Why MMNPAY?</h2>
+
+<div class="cards">
+
+<div class="card">
+<h3>Fast Payments</h3>
+<p>Accept payments easily from customers around the world.</p>
+</div>
+
+<div class="card">
+<h3>Secure</h3>
+<p>Built with modern payment security standards.</p>
+</div>
+
+<div class="card">
+<h3>Global</h3>
+<p>Designed for international businesses.</p>
+</div>
+
+</div>
+
+</section>
+
+
+
+<section id="checkout" class="section">
+
+<h2>Checkout Demo</h2>
+
+<div class="checkout">
+
+<h3>Payment Amount</h3>
+
+<h1>€100.00</h1>
+
+<div class="payment">
+💳 Visa / Mastercard
+</div>
+
+<div class="payment">
+🅿️ PayPal
+</div>
+
+<div class="payment">
+🍎 Apple Pay
+</div>
+
+<div class="payment">
+🏦 Bank Transfer
+</div>
+
+<a class="btn" href="#">
+Pay Now
+</a>
+
+</div>
+
+</section>
+
+
+
+<section class="section ar">
+
+<h2>بوابة الدفع MMNPAY</h2>
+
+<p>
+حلول دفع سهلة وآمنة للتجار والعملاء حول العالم.
+</p>
+
+<p>
+نوفر تجربة دفع احترافية وقابلة للتطوير.
+</p>
+
+</section>
+
+
+<footer>
+
+© 2026 MMNPAY. All Rights Reserved.
+
+</footer>
+
+
+</body>
+</html>

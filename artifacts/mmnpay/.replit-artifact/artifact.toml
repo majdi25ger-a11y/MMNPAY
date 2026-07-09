@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "MMNPAY"
+version = "1.0.0"
+id = "artifacts/mmnpay"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18905
+
+[services.development]
+run = "pnpm --filter @workspace/mmnpay run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mmnpay", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mmnpay/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18905"
+BASE_PATH = "/"
