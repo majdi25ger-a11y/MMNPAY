@@ -19,6 +19,7 @@ export default function Pay() {
         currency: "EUR",
         description: "Payment Request"
           };
+  console.log(payment);
 
   return (
     <div className="min-h-screen bg-[#f6f9fc] flex items-center justify-center p-5">
