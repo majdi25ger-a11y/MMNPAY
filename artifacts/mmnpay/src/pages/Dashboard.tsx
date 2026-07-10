@@ -29,6 +29,16 @@ export default function Dashboard() {
       "payment_" + id,
       JSON.stringify(payment)
     );
+    const payments = JSON.parse(
+      localStorage.getItem("payments") || "[]"
+    );
+
+    payments.push(payment);
+
+    localStorage.setItem(
+      "payments",
+      JSON.stringify(payments)
+    );
 
     setLink(
       `${window.location.origin}/pay/${id}`
@@ -116,6 +126,47 @@ export default function Dashboard() {
             </p>
 
           </div>
+
+        )}
+
+      </div>
+      <div className="mt-8 bg-white rounded-2xl shadow p-6">
+
+        <h2 className="text-2xl font-bold mb-4">
+          Payment Links
+        </h2>
+
+        {JSON.parse(localStorage.getItem("payments") || "[]").length === 0 ? (
+
+          <p className="text-gray-500">
+            No payment links yet.
+          </p>
+
+        ) : (
+
+          JSON.parse(localStorage.getItem("payments") || "[]").map((item: any) => (
+
+            <div
+              key={item.id}
+              className="flex justify-between items-center border-b py-4"
+            >
+              <div>
+                <p className="font-bold">{item.merchant}</p>
+                <p className="text-sm text-gray-500">
+                  €{item.amount}
+                </p>
+              </div>
+
+              <a
+                href={`/pay/${item.id}`}
+                className="text-[#635bff] font-bold"
+              >
+                Open
+              </a>
+
+            </div>
+
+          ))
 
         )}
 
