@@ -55,7 +55,7 @@ export default function Pay() {
           </p>
 
           <h2 className="text-4xl font-bold">
-            €{payment.amount}
+            €{JSON.stringify(payment.amount)}
           </h2>
 
         </div>
