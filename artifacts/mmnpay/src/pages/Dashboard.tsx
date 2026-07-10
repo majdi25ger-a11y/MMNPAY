@@ -8,14 +8,31 @@ export default function Dashboard() {
   const [link, setLink] = useState("");
 
   function createLink() {
-    const id = "MMN" + Math.floor(Math.random() * 100000);
 
-    setLink(
-      `${window.location.origin}/pay/${id}`
+    if (!merchant || !amount) {
+      alert("Please enter merchant and amount");
+      return;
+    }
+
+    const id = "MMN" + Date.now();
+
+    const payment = {
+      id,
+      merchant,
+      amount,
+      description,
+      currency: "EUR"
+    };
+
+    localStorage.setItem(
+      "payment_" + id,
+      JSON.stringify(payment)
     );
-  }
 
-  return (
+    return (
+      setLink(`${window.location.origin}/pay/${id}`)
+
+  }
     <div className="min-h-screen bg-[#f6f9fc] flex items-center justify-center p-6">
 
       <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-xl">
