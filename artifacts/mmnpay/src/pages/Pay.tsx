@@ -109,10 +109,33 @@ export default function Pay() {
 
 
 
-        <button className="w-full bg-[#635bff] hover:bg-[#0a2540] text-white py-4 rounded-xl font-bold mt-4">
+        <button
+          onClick={() => {
 
+            const transactions = JSON.parse(
+              localStorage.getItem("transactions") || "[]"
+            );
+
+            transactions.push({
+              id: Date.now(),
+              paymentId: payment.id,
+              merchant: payment.merchant,
+              amount: payment.amount,
+              date: new Date().toLocaleString(),
+              status: "Paid"
+            });
+
+            localStorage.setItem(
+              "transactions",
+              JSON.stringify(transactions)
+            );
+
+            alert("Payment Successful!");
+
+          }}
+          className="w-full bg-[#635bff] hover:bg-[#0a2540] text-white py-4 rounded-xl font-bold mt-4"
+        >
           Pay Now
-
         </button>
 
 
