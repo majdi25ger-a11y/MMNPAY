@@ -6,6 +6,7 @@ import Home from '@/pages/Home';
 import Checkout from '@/pages/Checkout';
 import Pay from '@/pages/Pay';
 import Dashboard from '@/pages/Dashboard';
+import Transactions from "@/pages/Transactions";
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/lib/language';
 
@@ -18,6 +19,8 @@ function Router() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/pay/:id" component={Pay} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/transactions" component={Transactions} />
+      
       <Route component={NotFound} />
     </Switch>
   );
