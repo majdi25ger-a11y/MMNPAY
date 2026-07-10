@@ -15,6 +15,10 @@ export default function Dashboard() {
     (sum, item) => sum + Number(item.amount),
     0
   );
+  const paymentLinks = JSON.parse(
+    localStorage.getItem("payments") || "[]"
+  );
+  
 
   function createLink() {
 
@@ -72,7 +76,9 @@ export default function Dashboard() {
 
         <div className="bg-white rounded-2xl shadow p-6">
           <p className="text-gray-500 text-sm">Payment Links</p>
-          <h2 className="text-3xl font-bold mt-2">1</h2>
+          <h2 className="text-3xl font-bold mt-2">
+            {paymentLinks.length}
+          </h2>
         </div>
 
         <div className="bg-white rounded-2xl shadow p-6">
