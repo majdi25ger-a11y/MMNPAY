@@ -5,15 +5,20 @@ import { Shield, Lock } from "lucide-react";
 export default function Pay() {
 
   const { id } = useParams();
+
+  const stored = localStorage.getItem("payment_" + id);
+
   const [method, setMethod] = useState("card");
 
-  const payment = {
-    id: id || "MMN-000001",
-    merchant: "MMNPAY Merchant",
-    amount: "100.00",
-    currency: "EUR",
-    description: "Payment Request"
-  };
+  const payment = stored
+    ? JSON.parse(stored)
+    : {
+        id: id || "MMN-000001",
+        merchant: "MMNPAY Merchant",
+        amount: "100.00",
+        currency: "EUR",
+        description: "Payment Request"
+          };
 
   return (
     <div className="min-h-screen bg-[#f6f9fc] flex items-center justify-center p-5">
