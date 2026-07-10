@@ -77,13 +77,15 @@ export default function Dashboard() {
 
         <div className="bg-white rounded-2xl shadow p-6">
           <p className="text-gray-500 text-sm">Transactions</p>
-          <h2 className="text-3xl font-bold mt-2">0</h2>
+          <h2 className="text-3xl font-bold mt-2">
+            {transactions.length}
+          </h2>
         </div>
 
         <div className="bg-white rounded-2xl shadow p-6">
           <p className="text-gray-500 text-sm">Revenue</p>
           <h2 className="text-3xl font-bold mt-2">
-            {transactions.length}
+            €{revenue.toFixed(2)}
           </h2>
         </div>
 
