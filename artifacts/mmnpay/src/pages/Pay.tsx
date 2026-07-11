@@ -2,6 +2,17 @@ import React, { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { Lock, Shield } from "lucide-react";
 
+// Picks the first defined, non-null, non-empty-string value from a list of
+// candidates. Used to normalize a payment record loaded from localStorage,
+// since it may come from either the "payments" list or the per-id
+// "payment_<id>" record, and either copy may be missing a field.
+function pick(...values: any[]) {
+  for (const v of values) {
+    if (v !== undefined && v !== null && v !== "") return v;
+  }
+  return undefined;
+}
+
 export default function Pay() {
 
   const { id } = useParams();
@@ -13,9 +24,47 @@ export default function Pay() {
     localStorage.getItem("payments") || "[]"
   );
 
-  const payment = payments.find(
+  const listPayment = payments.find(
     (item: any) => String(item.id) === String(id)
   );
+
+  // The dashboard also writes a full, untouched copy of every payment under
+  // its own "payment_<id>" key at creation time. That copy is used as a
+  // fallback source so a stale or partially-updated entry in the "payments"
+  // array (e.g. one missing amount/currency/description) never results in
+  // blank fields on the payment page.
+  let singlePayment: any = null;
+
+  if (id) {
+    try {
+      const rawSingle = localStorage.getItem("payment_" + id);
+      singlePayment = rawSingle ? JSON.parse(rawSingle) : null;
+    } catch {
+      singlePayment = null;
+    }
+  }
+
+  const payment = listPayment || singlePayment
+    ? {
+        id: pick(listPayment?.id, singlePayment?.id, id),
+        merchant: pick(listPayment?.merchant, singlePayment?.merchant, ""),
+        amount: pick(
+          listPayment?.amount,
+          singlePayment?.amount,
+          listPayment?.value,
+          singlePayment?.value,
+          listPayment?.total,
+          singlePayment?.total,
+          listPayment?.price,
+          singlePayment?.price,
+          ""
+        ),
+        currency: pick(listPayment?.currency, singlePayment?.currency, "EUR"),
+        description: pick(listPayment?.description, singlePayment?.description, ""),
+        status: pick(listPayment?.status, singlePayment?.status, "Active"),
+        createdAt: pick(listPayment?.createdAt, singlePayment?.createdAt, ""),
+      }
+    : null;
 
   if (!payment) {
 
@@ -42,6 +91,10 @@ export default function Pay() {
   }
 
   function payNow() {
+
+    if (!payment) {
+      return;
+    }
 
     const transactions = JSON.parse(
       localStorage.getItem("transactions") || "[]"
