@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import Sidebar from "@/components/Sidebar";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
@@ -49,6 +50,8 @@ function normalizeInvoice(item: any): Invoice {
 }
 
 export default function Invoices() {
+
+  const [, navigate] = useLocation();
 
   const [search, setSearch] = useState("");
 
@@ -165,12 +168,23 @@ export default function Invoices() {
               All Invoices
             </h2>
 
-            <input
-              className="border rounded-xl p-3 md:w-80"
-              placeholder="Search invoice or customer..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <div className="flex flex-col md:flex-row gap-3">
+
+              <input
+                className="border rounded-xl p-3 md:w-80"
+                placeholder="Search invoice or customer..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <button
+                onClick={() => navigate("/invoices/create")}
+                className="bg-[#635bff] text-white px-5 py-3 rounded-xl font-bold whitespace-nowrap"
+              >
+                + New Invoice
+              </button>
+
+            </div>
 
           </div>
 
