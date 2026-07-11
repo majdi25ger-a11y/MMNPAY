@@ -66,6 +66,8 @@ export default function Pay() {
       }
     : null;
 
+  console.log("DEBUG payment object loaded in Pay.tsx:", payment);
+
   if (!payment) {
 
     return (
