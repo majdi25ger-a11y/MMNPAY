@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 const COUNTRIES = [
   "United States",
@@ -59,6 +60,7 @@ function generateOrganizationId(): string {
 
 export default function CreateOrganization() {
 
+  const [, navigate] = useLocation();
   const [form, setForm] = useState<OrganizationForm>(DEFAULT_FORM);
   const [created, setCreated] = useState(false);
 
@@ -92,7 +94,36 @@ export default function CreateOrganization() {
       JSON.stringify(organization)
     );
 
+    const existingSettings = localStorage.getItem("settings");
+
+    if (!existingSettings) {
+
+      const defaultSettings = {
+        companyName: form.companyName,
+        email: form.businessEmail,
+        phone: "",
+        website: "",
+        address: "",
+        logoUrl: "",
+        primaryColor: "#635bff",
+        defaultCurrency: form.defaultCurrency,
+        defaultDescription: "",
+        vatEnabled: false,
+        vatPercentage: ""
+      };
+
+      localStorage.setItem(
+        "settings",
+        JSON.stringify(defaultSettings)
+      );
+
+    }
+
     setCreated(true);
+
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1200);
 
   }
 
