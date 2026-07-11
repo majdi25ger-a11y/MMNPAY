@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
 export default function Dashboard() {
@@ -6,20 +6,34 @@ export default function Dashboard() {
   const [merchant, setMerchant] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [currency, setCurrency] = useState("EUR");
+  const [search, setSearch] = useState("");
   const [link, setLink] = useState("");
+
+  const paymentLinks = JSON.parse(
+    localStorage.getItem("payments") || "[]"
+  );
+
   const transactions = JSON.parse(
     localStorage.getItem("transactions") || "[]"
   );
 
-  const revenue = (transactions as any[]).reduce(
-    (sum, item) => sum + Number(item.amount),
+  const revenue = transactions.reduce(
+    (sum: number, item: any) => sum + Number(item.amount),
     0
   );
-  const paymentLinks = JSON.parse(
-    localStorage.getItem("payments") || "[]"
-  );
-  
 
+  const filteredLinks = useMemo(() => {
+
+    return paymentLinks.filter((item: any) =>
+
+      item.merchant
+        .toLowerCase()
+        .includes(search.toLowerCase())
+
+    );
+
+  }, [paymentLinks, search]);
   function createLink() {
 
     if (!merchant || !amount) {
@@ -34,31 +48,33 @@ export default function Dashboard() {
       merchant,
       amount,
       description,
-      currency: "EUR"
+      currency,
+      status: "Active",
+      createdAt: new Date().toLocaleString()
     };
 
-    localStorage.setItem(
-      "payment_" + id,
-      JSON.stringify(payment)
-    );
     const payments = JSON.parse(
       localStorage.getItem("payments") || "[]"
     );
 
-    payments.push(payment);
+    payments.unshift(payment);
 
     localStorage.setItem(
       "payments",
       JSON.stringify(payments)
     );
 
-    setLink(
-      `${window.location.origin}/pay/${id}`
-    );
+    setLink(`${window.location.origin}/pay/${id}`);
 
+    setMerchant("");
+    setAmount("");
+    setDescription("");
+
+    window.location.reload();
   }
+  return (
 
-  return (     <div className="flex min-h-screen bg-[#f6f9fc]">
+  <div className="flex min-h-screen bg-[#f6f9fc]">
 
     <Sidebar />
 
@@ -72,32 +88,50 @@ export default function Dashboard() {
         Create and manage your payment links.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 
         <div className="bg-white rounded-2xl shadow p-6">
-          <p className="text-gray-500 text-sm">Payment Links</p>
+          <p className="text-gray-500 text-sm">
+            Payment Links
+          </p>
+
           <h2 className="text-3xl font-bold mt-2">
             {paymentLinks.length}
           </h2>
         </div>
 
         <div className="bg-white rounded-2xl shadow p-6">
-          <p className="text-gray-500 text-sm">Transactions</p>
+          <p className="text-gray-500 text-sm">
+            Transactions
+          </p>
+
           <h2 className="text-3xl font-bold mt-2">
             {transactions.length}
           </h2>
         </div>
 
         <div className="bg-white rounded-2xl shadow p-6">
-          <p className="text-gray-500 text-sm">Revenue</p>
+          <p className="text-gray-500 text-sm">
+            Revenue
+          </p>
+
           <h2 className="text-3xl font-bold mt-2">
             €{revenue.toFixed(2)}
           </h2>
         </div>
 
-      </div>
+        <div className="bg-white rounded-2xl shadow p-6">
+          <p className="text-gray-500 text-sm">
+            Currency
+          </p>
 
-      <div className="bg-white rounded-2xl shadow p-8 max-w-xl">
+          <h2 className="text-3xl font-bold mt-2">
+            {currency}
+          </h2>
+        </div>
+
+      </div>
+      <div className="bg-white rounded-2xl shadow p-8 mb-8">
 
         <h2 className="text-2xl font-bold mb-6">
           Create Payment Link
@@ -112,17 +146,27 @@ export default function Dashboard() {
 
         <input
           className="w-full border rounded-xl p-3 mb-4"
-          placeholder="Amount (EUR)"
+          placeholder="Amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
 
-        <input
-          className="w-full border rounded-xl p-3 mb-6"
+        <textarea
+          className="w-full border rounded-xl p-3 mb-4"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+
+        <select
+          className="w-full border rounded-xl p-3 mb-6"
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value)}
+        >
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+          <option value="GBP">GBP</option>
+        </select>
 
         <button
           onClick={createLink}
@@ -133,70 +177,138 @@ export default function Dashboard() {
 
         {link && (
 
-          <div className="mt-6 bg-[#f6f9fc] rounded-xl p-4">
+          <div className="mt-6 bg-gray-100 rounded-xl p-4">
 
             <p className="text-sm text-gray-500">
               Payment Link
             </p>
 
-            <p className="break-all font-bold mt-2">
-              {link}
-            </p>
+            <div className="flex justify-between items-center mt-2">
+
+              <p className="font-bold break-all">
+                {link}
+              </p>
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(link);
+                  alert("Copied!");
+                }}
+                className="text-blue-600 font-bold"
+              >
+                Copy
+              </button>
+
+            </div>
 
           </div>
 
         )}
 
       </div>
-      <div className="mt-8 bg-white rounded-2xl shadow p-6">
+              <div className="bg-white rounded-2xl shadow p-8">
 
-        <h2 className="text-2xl font-bold mb-4">
-          Payment Links
-        </h2>
+                <div className="flex justify-between items-center mb-6">
 
-      
+                  <h2 className="text-2xl font-bold">
+                    Payment Links
+                  </h2>
 
-          {paymentLinks.length === 0 ? (
+                  <input
+                    className="border rounded-xl p-3 w-72"
+                    placeholder="Search merchant..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
 
-            <p className="text-gray-500">
-              No payment links yet.
-            </p>
-
-          ) : (
-
-            paymentLinks.map((item: any) => (
-
-              <div
-                key={item.id}
-                className="flex justify-between items-center border-b py-4"
-              >
-
-                <div>
-                  <p className="font-bold">{item.merchant}</p>
-                  <p className="text-sm text-gray-500">
-                    €{item.amount}
-                  </p>
                 </div>
 
-                <a
-                  href={`/pay/${item.id}`}
-                  className="text-[#635bff] font-bold"
-                >
-                  Open
-                </a>
+                {filteredLinks.length === 0 ? (
+
+                  <p className="text-gray-500">
+                    No payment links found.
+                  </p>
+
+                ) : (
+
+                  filteredLinks.map((item: any) => (
+
+                    <div
+                      key={item.id}
+                      className="flex justify-between items-center border-b py-4"
+                    >
+
+                      <div>
+
+                        <h3 className="font-bold">
+                          {item.merchant}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                          {item.amount} {item.currency}
+                        </p>
+
+                        <p className="text-xs text-gray-400">
+                          {item.createdAt}
+                        </p>
+
+                      </div>
+
+                      <div className="flex items-center gap-4">
+
+                        <span className="text-green-600 font-semibold">
+                          {item.status}
+                        </span>
+
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              `${window.location.origin}/pay/${item.id}`
+                            );
+                            alert("Link copied!");
+                          }}
+                          className="text-green-600 font-bold"
+                        >
+                          Copy
+                        </button>
+
+                        <a
+                          href={`/pay/${item.id}`}
+                          className="text-blue-600 font-bold"
+                        >
+                          Open
+                        </a>
+
+                        <button
+                          onClick={() => {
+
+                            const updated = paymentLinks.filter(
+                              (p: any) => p.id !== item.id
+                            );
+
+                            localStorage.setItem(
+                              "payments",
+                              JSON.stringify(updated)
+                            );
+
+                            window.location.reload();
+
+                          }}
+                          className="text-red-600 font-bold"
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  ))
+
+                )}
 
               </div>
 
-            ))
-
-          )}
-
-        </div>
-         
-
-        
-
-    
             </main>
 
           </div>
@@ -204,3 +316,4 @@ export default function Dashboard() {
         );
 
       }
+      
