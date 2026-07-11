@@ -1,5 +1,15 @@
 import React, { useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
+import {
+  getPayments,
+  savePayments,
+  getTransactions,
+  saveTransactions,
+  getInvoices,
+  getSettings,
+  saveSettings,
+  savePaymentRecord
+} from "@/lib/storage";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: "€",
@@ -9,12 +19,10 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 
 export default function Dashboard() {
 
-  const settings = JSON.parse(
-    localStorage.getItem("settings") || "null"
-  );
+  const settings = getSettings();
 
-  const companyName = settings?.companyName || "Dashboard";
-  const defaultCurrency = settings?.defaultCurrency || "EUR";
+  const companyName = settings.companyName || "Dashboard";
+  const defaultCurrency = settings.defaultCurrency || "EUR";
   const currencySymbol = CURRENCY_SYMBOLS[defaultCurrency] || defaultCurrency + " ";
 
   const [merchant, setMerchant] = useState("");
@@ -24,22 +32,16 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [link, setLink] = useState("");
 
-  const paymentLinks = JSON.parse(
-    localStorage.getItem("payments") || "[]"
-  );
+  const paymentLinks = getPayments();
 
-  const transactions = JSON.parse(
-    localStorage.getItem("transactions") || "[]"
-  );
+  const transactions = getTransactions();
 
   const revenue = transactions.reduce(
     (sum: number, item: any) => sum + Number(item.amount),
     0
   );
 
-  const invoices = JSON.parse(
-    localStorage.getItem("invoices") || "[]"
-  );
+  const invoices = getInvoices();
 
   const totalCustomers = new Set(
     transactions.map((item: any) => item.merchant)
@@ -90,21 +92,13 @@ export default function Dashboard() {
       createdAt: new Date().toLocaleString()
     };
 
-    localStorage.setItem(
-      "payment_" + id,
-      JSON.stringify(payment)
-    );
+    savePaymentRecord(payment);
 
-    const payments = JSON.parse(
-      localStorage.getItem("payments") || "[]"
-    );
+    const payments = getPayments();
 
     payments.unshift(payment);
 
-    localStorage.setItem(
-      "payments",
-      JSON.stringify(payments)
-    );
+    savePayments(payments);
 
     setLink(
       `${window.location.origin}/pay/${id}`
@@ -388,10 +382,7 @@ export default function Dashboard() {
                       (p: any) => p.id !== item.id
                     );
 
-                    localStorage.setItem(
-                      "payments",
-                      JSON.stringify(updated)
-                    );
+                    savePayments(updated);
 
                     window.location.reload();
 
