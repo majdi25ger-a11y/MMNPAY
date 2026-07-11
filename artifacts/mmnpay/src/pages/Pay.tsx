@@ -141,6 +141,61 @@ export default function Pay() {
       JSON.stringify(updatedPayments)
     );
 
+    // Find the invoice this payment was generated from and mark it Paid.
+    // Payments created from an invoice do not carry an explicit invoice
+    // reference field, so the related invoice is located by matching the
+    // fields copied onto the payment when the link was generated
+    // (customer/merchant, amount, currency, description) against invoices
+    // still in the "Sent" state.
+    const invoices = JSON.parse(
+      localStorage.getItem("invoices") || "[]"
+    );
+
+    const invoiceRef = pick(
+      (payment as any).invoiceNumber,
+      (payment as any).invoiceRef
+    );
+
+    let matchedInvoice = false;
+
+    const updatedInvoices = invoices.map((invoice: any) => {
+
+      if (invoice.status !== "Sent") {
+        return invoice;
+      }
+
+      const isSameReference =
+        invoiceRef !== undefined &&
+        String(pick(invoice.invoiceNumber, invoice.number, invoice.id)) === String(invoiceRef);
+
+      const isSameDetails =
+        String(pick(invoice.customerName, invoice.customer, invoice.merchant)) === String(payment.merchant) &&
+        String(pick(invoice.amount, invoice.total, "")) === String(payment.amount) &&
+        String(pick(invoice.currency, "EUR")) === String(payment.currency) &&
+        String(pick(invoice.description, "")) === String(payment.description);
+
+      if (!(isSameReference || isSameDetails)) {
+        return invoice;
+      }
+
+      matchedInvoice = true;
+
+      return {
+        ...invoice,
+        status: "Paid"
+      };
+
+    });
+
+    if (matchedInvoice) {
+
+      localStorage.setItem(
+        "invoices",
+        JSON.stringify(updatedInvoices)
+      );
+
+    }
+
     alert("Payment Successful!");
 
     navigate("/transactions");
