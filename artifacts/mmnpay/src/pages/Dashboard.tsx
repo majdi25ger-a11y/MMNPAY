@@ -1,12 +1,26 @@
 import React, { useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£"
+};
+
 export default function Dashboard() {
+
+  const settings = JSON.parse(
+    localStorage.getItem("settings") || "null"
+  );
+
+  const companyName = settings?.companyName || "Dashboard";
+  const defaultCurrency = settings?.defaultCurrency || "EUR";
+  const currencySymbol = CURRENCY_SYMBOLS[defaultCurrency] || defaultCurrency + " ";
 
   const [merchant, setMerchant] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [currency, setCurrency] = useState("EUR");
+  const [currency, setCurrency] = useState(defaultCurrency);
   const [search, setSearch] = useState("");
   const [link, setLink] = useState("");
 
@@ -111,7 +125,7 @@ export default function Dashboard() {
       <main className="flex-1 p-8">
 
         <h1 className="text-4xl font-bold text-[#0a2540]">
-          Dashboard
+          {companyName}
         </h1>
 
         <p className="text-gray-500 mt-2 mb-8">
@@ -145,7 +159,7 @@ export default function Dashboard() {
             </p>
 
             <h2 className="text-3xl font-bold mt-2">
-              €{revenue.toFixed(2)}
+              {currencySymbol}{revenue.toFixed(2)}
             </h2>
           </div>
 
