@@ -5,14 +5,19 @@ import { Shield, Lock } from "lucide-react";
 export default function Pay() {
 
   const { id } = useParams();
+  console.log("Route ID:", id);
 
   const payments = JSON.parse(
     localStorage.getItem("payments") || "[]"
   );
 
   const payment = payments.find(
-    (item: any) => item.id === id
+    (item: any) => {
+      console.log(item.id, id);
+      return String(item.id) === String(id);
+    }
   );
+  console.log("PAYMENT =", JSON.stringify(payment, null, 2));
   console.log("Payment Object:", payment);
   console.log("Payments:", payments);
   console.log("Current Payment:", payment);
