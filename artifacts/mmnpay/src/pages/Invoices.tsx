@@ -89,6 +89,7 @@ export default function Invoices() {
 
     const payment = {
       id: paymentId,
+      invoiceId: invoice.invoiceNumber,
       merchant: invoice.customerName,
       amount: invoice.amount,
       description: invoice.description,
