@@ -13,6 +13,7 @@ export default function Pay() {
   const payment = payments.find(
     (item: any) => item.id === id
   );
+  console.log("Payment Object:", payment);
   console.log("Payments:", payments);
   console.log("Current Payment:", payment);
 
