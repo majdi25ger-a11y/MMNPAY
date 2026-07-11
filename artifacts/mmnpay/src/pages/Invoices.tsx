@@ -144,6 +144,33 @@ export default function Invoices() {
 
   }
 
+  function editInvoice(invoice: Invoice) {
+
+    navigate(`/invoices/edit/${invoice.invoiceNumber}`);
+
+  }
+
+  function deleteInvoice(index: number) {
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this invoice?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const updatedRawInvoices = rawInvoices.filter((_, i) => i !== index);
+
+    setRawInvoices(updatedRawInvoices);
+
+    localStorage.setItem(
+      "invoices",
+      JSON.stringify(updatedRawInvoices)
+    );
+
+  }
+
   return (
 
     <div className="flex min-h-screen bg-[#f6f9fc]">
@@ -340,6 +367,24 @@ export default function Invoices() {
                       </div>
 
                     )}
+
+                    <div className="flex gap-3 mt-1 pt-3 border-t">
+
+                      <button
+                        onClick={() => editInvoice(invoice)}
+                        className="flex-1 border border-gray-200 text-[#0a2540] py-2 rounded-xl font-bold"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => deleteInvoice(rawIndex)}
+                        className="flex-1 border border-red-200 text-red-600 py-2 rounded-xl font-bold"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
 
                   </div>
 
