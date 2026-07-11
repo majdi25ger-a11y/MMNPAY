@@ -19,6 +19,10 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 
 export default function Dashboard() {
 
+  const organization = JSON.parse(
+    localStorage.getItem("organization") || "null"
+  );
+
   const settings = getSettings();
 
   const companyName = settings.companyName || "Dashboard";
@@ -125,6 +129,23 @@ export default function Dashboard() {
         <p className="text-gray-500 mt-2 mb-8">
           Create and manage your payment links.
         </p>
+
+        {organization && (
+
+          <div className="mb-8">
+
+            <p className="text-gray-500 text-lg">
+              Welcome back,
+            </p>
+
+            <h2 className="text-2xl font-bold text-[#0a2540]">
+              {organization.companyName}
+            </h2>
+
+          </div>
+
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 
           <div className="bg-white rounded-2xl shadow p-6">
