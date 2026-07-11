@@ -23,6 +23,28 @@ export default function Dashboard() {
     0
   );
 
+  const invoices = JSON.parse(
+    localStorage.getItem("invoices") || "[]"
+  );
+
+  const totalCustomers = new Set(
+    transactions.map((item: any) => item.merchant)
+  ).size;
+
+  const totalInvoices = invoices.length;
+
+  const draftInvoices = invoices.filter(
+    (item: any) => item.status === "Draft"
+  ).length;
+
+  const sentInvoices = invoices.filter(
+    (item: any) => item.status === "Sent"
+  ).length;
+
+  const paidInvoices = invoices.filter(
+    (item: any) => item.status === "Paid"
+  ).length;
+
   const filteredLinks = useMemo(() => {
 
     return paymentLinks.filter((item: any) =>
@@ -134,6 +156,60 @@ export default function Dashboard() {
 
             <h2 className="text-3xl font-bold mt-2">
               {currency}
+            </h2>
+          </div>
+
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <p className="text-gray-500 text-sm">
+              Total Customers
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {totalCustomers}
+            </h2>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <p className="text-gray-500 text-sm">
+              Total Invoices
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {totalInvoices}
+            </h2>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <p className="text-gray-500 text-sm">
+              Draft Invoices
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {draftInvoices}
+            </h2>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <p className="text-gray-500 text-sm">
+              Sent Invoices
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {sentInvoices}
+            </h2>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <p className="text-gray-500 text-sm">
+              Paid Invoices
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {paidInvoices}
             </h2>
           </div>
 
