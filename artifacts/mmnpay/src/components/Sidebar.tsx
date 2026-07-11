@@ -4,7 +4,8 @@ import {
   Link2,
   CreditCard,
   FileText,
-  Settings
+  Settings,
+  Users
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -25,6 +26,11 @@ export default function Sidebar() {
       title: "Transactions",
       icon: CreditCard,
       href: "/transactions"
+    },
+    {
+      title: "Customers",
+      icon: Users,
+      href: "/customers"
     },
     {
       title: "Invoices",
