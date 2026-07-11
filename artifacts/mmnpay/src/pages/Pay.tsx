@@ -66,8 +66,6 @@ export default function Pay() {
       }
     : null;
 
-  console.log("DEBUG payment object loaded in Pay.tsx:", payment);
-
   if (!payment) {
 
     return (
@@ -226,6 +224,9 @@ export default function Pay() {
           </button>
 
         ))}
+
+        {/* TEMPORARY DEBUG OUTPUT — remove after inspection */}
+        <pre className="text-xs bg-gray-100 rounded-xl p-4 mt-4 overflow-auto">{JSON.stringify(payment, null, 2)}</pre>
 
         <button
           onClick={payNow}
