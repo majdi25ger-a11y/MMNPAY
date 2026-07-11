@@ -154,41 +154,49 @@ export default function Dashboard() {
           Payment Links
         </h2>
 
-        {JSON.parse(localStorage.getItem("payments") || "[]").length === 0 ? (
+      
 
-          <p className="text-gray-500">
-            No payment links yet.
-          </p>
+          {paymentLinks.length === 0 ? (
 
-        ) : (
+            <p className="text-gray-500">
+              No payment links yet.
+            </p>
 
-          JSON.parse(localStorage.getItem("payments") || "[]").map((item: any) => (
+          ) : (
 
-            <div
-              key={item.id}
-              className="flex justify-between items-center border-b py-4"
-            >
-              <div>
-                <p className="font-bold">{item.merchant}</p>
-                <p className="text-sm text-gray-500">
-                  €{item.amount}
-                </p>
+            paymentLinks.map((item: any) => (
+
+              <div
+                key={item.id}
+                className="flex justify-between items-center border-b py-4"
+              >
+
+                <div>
+                  <p className="font-bold">{item.merchant}</p>
+                  <p className="text-sm text-gray-500">
+                    €{item.amount}
+                  </p>
+                </div>
+
+                <a
+                  href={`/pay/${item.id}`}
+                  className="text-[#635bff] font-bold"
+                >
+                  Open
+                </a>
+
               </div>
 
-              <a
-                href={`/pay/${item.id}`}
-                className="text-[#635bff] font-bold"
-              >
-                Open
-              </a>
+            ))
 
-            </div>
+          )}
 
-          ))
+        </div>
+         
 
-        )}
+        
 
-      </div>
+    
             </main>
 
           </div>
