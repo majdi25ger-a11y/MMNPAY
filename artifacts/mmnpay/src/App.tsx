@@ -11,6 +11,7 @@ import Customers from "@/pages/Customers";
 import Invoices from "@/pages/Invoices";
 import CreateInvoice from "@/pages/CreateInvoice";
 import EditInvoice from "@/pages/EditInvoice";
+import Settings from "@/pages/Settings";
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/lib/language';
 
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/invoices" component={Invoices} />
       <Route path="/invoices/create" component={CreateInvoice} />
       <Route path="/invoices/edit/:invoiceNumber" component={EditInvoice} />
+      <Route path="/settings" component={Settings} />
       
       <Route component={NotFound} />
     </Switch>
