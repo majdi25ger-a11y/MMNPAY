@@ -151,10 +151,7 @@ export default function Pay() {
       localStorage.getItem("invoices") || "[]"
     );
 
-    const invoiceRef = pick(
-      (payment as any).invoiceNumber,
-      (payment as any).invoiceRef
-    );
+    const invoiceId = (payment as any).invoiceId;
 
     let matchedInvoice = false;
 
@@ -165,16 +162,10 @@ export default function Pay() {
       }
 
       const isSameReference =
-        invoiceRef !== undefined &&
-        String(pick(invoice.invoiceNumber, invoice.number, invoice.id)) === String(invoiceRef);
+        invoiceId !== undefined &&
+        String(pick(invoice.invoiceNumber, invoice.number, invoice.id)) === String(invoiceId);
 
-      const isSameDetails =
-        String(pick(invoice.customerName, invoice.customer, invoice.merchant)) === String(payment.merchant) &&
-        String(pick(invoice.amount, invoice.total, "")) === String(payment.amount) &&
-        String(pick(invoice.currency, "EUR")) === String(payment.currency) &&
-        String(pick(invoice.description, "")) === String(payment.description);
-
-      if (!(isSameReference || isSameDetails)) {
+      if (!isSameReference) {
         return invoice;
       }
 
