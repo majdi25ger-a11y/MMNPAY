@@ -13,6 +13,8 @@ export default function Pay() {
   const payment = payments.find(
     (item: any) => item.id === id
   );
+  console.log("Payments:", payments);
+  console.log("Current Payment:", payment);
 
   const [method, setMethod] = useState("card");
 
