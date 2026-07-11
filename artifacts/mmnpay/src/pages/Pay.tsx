@@ -179,7 +179,7 @@ export default function Pay() {
             Amount
           </p>
 
-          <h2 className="text-4xl font-bold">
+          <h2 className="text-4xl font-bold text-white">
             €{payment.amount}
           </h2>
 
@@ -224,9 +224,6 @@ export default function Pay() {
           </button>
 
         ))}
-
-        {/* TEMPORARY DEBUG OUTPUT — remove after inspection */}
-        <pre className="text-xs bg-gray-100 rounded-xl p-4 mt-4 overflow-auto">{JSON.stringify(payment, null, 2)}</pre>
 
         <button
           onClick={payNow}
