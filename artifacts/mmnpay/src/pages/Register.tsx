@@ -50,7 +50,7 @@ export default function Register() {
         password: form.password
       });
 
-      navigate("/login");
+      navigate("/create-organization");
 
     } catch (err) {
 

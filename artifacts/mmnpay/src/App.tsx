@@ -14,6 +14,7 @@ import EditInvoice from "@/pages/EditInvoice";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import CreateOrganization from "@/pages/CreateOrganization";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/lib/language';
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/create-organization" component={CreateOrganization} />
       <Route path="/pay/:id" component={Pay} />
       <Route path="/dashboard">
         <ProtectedRoute>
