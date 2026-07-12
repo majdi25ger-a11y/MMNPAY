@@ -15,9 +15,11 @@ import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import CreateOrganization from "@/pages/CreateOrganization";
+import Admin from "@/pages/Admin";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/lib/language';
+import { ROLES } from '@/lib/permissions';
 
 const queryClient = new QueryClient();
 
@@ -68,6 +70,11 @@ function Router() {
       <Route path="/payment-links">
         <ProtectedRoute>
           <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin">
+        <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
+          <Admin />
         </ProtectedRoute>
       </Route>
 

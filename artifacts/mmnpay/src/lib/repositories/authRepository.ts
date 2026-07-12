@@ -6,12 +6,18 @@
 
 import { supabase } from "@/lib/supabase";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import * as roleRepository from "@/lib/repositories/roleRepository";
+import type { Role } from "@/lib/repositories/roleRepository";
 
 export interface User {
   id: string;
   fullName: string;
   email: string;
   createdAt: string;
+}
+
+export interface UserWithRole extends User {
+  role: Role;
 }
 
 export interface NewUserInput {
@@ -94,6 +100,27 @@ export async function login(email: string, password: string): Promise<User> {
   }
 
   return toUser(data.user);
+
+}
+
+// Returns the currently authenticated user together with their role, or
+// null if there is no active session. Existing callers that only need the
+// user should keep using `getCurrentUser` -- this is additive and does not
+// change that function's return shape.
+export async function getCurrentUserWithRole(): Promise<UserWithRole | null> {
+
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    return null;
+  }
+
+  const role = await roleRepository.getRoleByUserId(currentUser.id);
+
+  return {
+    ...currentUser,
+    role
+  };
 
 }
 
