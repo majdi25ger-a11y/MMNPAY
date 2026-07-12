@@ -1,13 +1,16 @@
 // Repository for user accounts and the current session. This is the
 // single place that knows how a "user" is registered, authenticated, and
-// persisted -- it owns the "users" and "currentUser" localStorage keys
-// directly, since no shared helpers for them exist yet in storage.ts.
+// persisted -- it wraps Supabase Auth exclusively. No page component may
+// talk to `supabase.auth` directly or rely on legacy localStorage auth
+// state; they must go through the functions exported here.
+
+import { supabase } from "@/lib/supabase";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export interface User {
   id: string;
   fullName: string;
   email: string;
-  password: string;
   createdAt: string;
 }
 
@@ -17,141 +20,101 @@ export interface NewUserInput {
   password: string;
 }
 
-const USERS_KEY = "users";
-const CURRENT_USER_KEY = "currentUser";
+// Maps a Supabase Auth user object to the app's User shape.
+function toUser(supabaseUser: SupabaseUser): User {
 
-function generateUserId(): string {
-  return "USR" + Date.now();
+  return {
+    id: supabaseUser.id,
+    fullName: (supabaseUser.user_metadata?.fullName as string) || "",
+    email: supabaseUser.email || "",
+    createdAt: supabaseUser.created_at
+  };
+
 }
 
-// Returns every registered user, falling back to an empty array if the
-// stored value is missing, corrupted, or not the shape we expect.
-function getUsers(): User[] {
+// Registers a new user with Supabase Auth and ensures an active session
+// exists before returning. Throws if the email is already registered or
+// the sign-up otherwise fails.
+export async function register(input: NewUserInput): Promise<User> {
 
-  try {
+  const { data, error } = await supabase.auth.signUp({
+    email: input.email,
+    password: input.password,
+    options: {
+      data: {
+        fullName: input.fullName
+      }
+    }
+  });
 
-    const raw = localStorage.getItem(USERS_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-
-  } catch {
-
-    return [];
-
+  if (error) {
+    throw new Error(error.message);
   }
 
-}
-
-function saveUsers(users: User[]): void {
-
-  try {
-
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-  } catch {
-
-    // Ignore write failures (e.g. storage full or unavailable).
-
-  }
-
-}
-
-// Registers a new user. Throws if the email is already registered.
-export function register(user: NewUserInput): User {
-
-  const users = getUsers();
-
-  const email = user.email.trim().toLowerCase();
-
-  const alreadyExists = users.some(
-    (existing) => existing.email.trim().toLowerCase() === email
-  );
-
-  if (alreadyExists) {
+  // Supabase's anti-enumeration behavior: signUp for an email that already
+  // exists succeeds but returns a user with an empty identities array.
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
     throw new Error("This email is already registered.");
   }
 
-  const newUser: User = {
-    id: generateUserId(),
-    fullName: user.fullName,
-    email: user.email,
-    password: user.password,
-    createdAt: new Date().toISOString()
-  };
+  if (!data.user) {
+    throw new Error("Unable to create account.");
+  }
 
-  saveUsers([...users, newUser]);
+  // If email confirmation is required, signUp does not return an active
+  // session. Explicitly sign in so the caller always ends up authenticated.
+  if (!data.session) {
 
-  return newUser;
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: input.email,
+      password: input.password
+    });
+
+    if (signInError) {
+      throw new Error(signInError.message);
+    }
+
+  }
+
+  return toUser(data.user);
 
 }
 
-// Authenticates a user by email/password and sets them as the current
-// session. Throws if the credentials do not match a registered user.
-export function login(email: string, password: string): User {
+// Authenticates a user by email/password via Supabase Auth. Throws if the
+// credentials do not match a registered user.
+export async function login(email: string, password: string): Promise<User> {
 
-  const users = getUsers();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
-  const normalizedEmail = email.trim().toLowerCase();
-
-  const match = users.find(
-    (existing) =>
-      existing.email.trim().toLowerCase() === normalizedEmail &&
-      existing.password === password
-  );
-
-  if (!match) {
+  if (error || !data.user) {
     throw new Error("Invalid email or password.");
   }
 
-  saveCurrentUser(match);
-
-  return match;
+  return toUser(data.user);
 
 }
 
-// Clears the current session.
-export function logout(): void {
+// Clears the current Supabase session.
+export async function logout(): Promise<void> {
 
-  try {
-
-    localStorage.removeItem(CURRENT_USER_KEY);
-
-  } catch {
-
-    // Ignore write failures.
-
-  }
+  await supabase.auth.signOut();
 
 }
 
-// Returns the currently logged-in user, or null if no session exists or
-// the stored value is missing/corrupted.
-export function getCurrentUser(): User | null {
+// Returns the currently authenticated Supabase user, or null if there is
+// no active session. Always reflects the live Supabase Auth session --
+// never legacy localStorage state.
+export async function getCurrentUser(): Promise<User | null> {
 
-  try {
+  const { data, error } = await supabase.auth.getUser();
 
-    const raw = localStorage.getItem(CURRENT_USER_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
-
-  } catch {
-
+  if (error || !data.user) {
     return null;
-
   }
 
-}
-
-// Persists the given user as the current session.
-export function saveCurrentUser(user: User): void {
-
-  try {
-
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-
-  } catch {
-
-    // Ignore write failures.
-
-  }
+  return toUser(data.user);
 
 }

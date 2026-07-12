@@ -33,7 +33,7 @@ export default function Register() {
 
   }
 
-  function handleCreateAccount() {
+  async function handleCreateAccount() {
 
     setError("");
 
@@ -44,7 +44,7 @@ export default function Register() {
 
     try {
 
-      authRepository.register({
+      await authRepository.register({
         fullName: form.fullName,
         email: form.email,
         password: form.password

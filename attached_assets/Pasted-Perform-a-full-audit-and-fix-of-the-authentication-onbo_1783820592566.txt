@@ -1,0 +1,55 @@
+Perform a full audit and fix of the authentication + onboarding flow without changing any UI, styling, copy, or design.
+
+Current issue:
+- Register succeeds using Supabase Auth.
+- Login succeeds.
+- After login the app goes directly to the old Dashboard.
+- Create Organization shows "You must be signed in to create an organization" even after a successful login.
+- This indicates the Supabase session is not being used consistently throughout the app.
+
+Required behavior:
+
+1. After successful register:
+   - Create the Supabase account.
+   - Ensure the user is authenticated (active session).
+   - Redirect to /create-organization.
+
+2. After successful login:
+   - Retrieve the authenticated Supabase user.
+   - Call organizationRepository.getOrganizationByUser(user.id).
+   - If no organization exists:
+       redirect to /create-organization.
+   - If an organization exists:
+       redirect to /dashboard.
+
+3. ProtectedRoute must use the real authenticated Supabase session instead of any legacy localStorage auth.
+
+4. authRepository.getCurrentUser() must always return the currently authenticated Supabase user by using the official Supabase Auth session APIs. It must never rely on legacy localStorage.
+
+5. CreateOrganization.tsx must obtain the owner_id from the authenticated Supabase session. It should only display "You must be signed in to create an organization." if there is truly no authenticated Supabase session.
+
+6. Remove every remaining dependency on the previous localStorage authentication system. localStorage may still be used for non-auth cached data if necessary, but authentication must be 100% Supabase.
+
+7. The dashboard onboarding flow must be:
+   - New user → Register → Create Organization → Dashboard.
+   - Existing user with organization → Login → Dashboard.
+   - Existing user without organization → Login → Create Organization.
+
+8. Audit every file involved in authentication and onboarding, including:
+   - authRepository.ts
+   - Login.tsx
+   - Register.tsx
+   - ProtectedRoute.tsx
+   - CreateOrganization.tsx
+   - Dashboard.tsx
+   - App.tsx
+   - organizationRepository.ts
+
+9. Remove any legacy redirects that always send authenticated users directly to Dashboard before checking for an organization.
+
+10. Preserve all existing UI, validation, styling, layout, translations, and component structure. Only fix the authentication/session/onboarding logic.
+
+After implementing the fix:
+- Run a full typecheck.
+- Verify the complete flow end-to-end.
+- Report exactly which files were modified and why.

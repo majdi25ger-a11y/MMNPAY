@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import * as authRepository from "@/lib/repositories/authRepository";
+import * as organizationRepository from "@/lib/repositories/organizationRepository";
 
 interface LoginForm {
   email: string;
@@ -28,7 +29,7 @@ export default function Login() {
 
   }
 
-  function handleLogin() {
+  async function handleLogin() {
 
     setError("");
 
@@ -39,9 +40,15 @@ export default function Login() {
 
     try {
 
-      authRepository.login(form.email, form.password);
+      const user = await authRepository.login(form.email, form.password);
 
-      navigate("/dashboard");
+      const organization = await organizationRepository.getOrganizationByUser(user.id);
+
+      if (organization) {
+        navigate("/dashboard");
+      } else {
+        navigate("/create-organization");
+      }
 
     } catch {
 

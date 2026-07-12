@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import {
   getPayments,
@@ -10,6 +10,9 @@ import {
   saveSettings,
   savePaymentRecord
 } from "@/lib/storage";
+import * as authRepository from "@/lib/repositories/authRepository";
+import * as organizationRepository from "@/lib/repositories/organizationRepository";
+import type { Organization } from "@/lib/repositories/organizationRepository";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: "€",
@@ -19,9 +22,33 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 
 export default function Dashboard() {
 
-  const organization = JSON.parse(
-    localStorage.getItem("organization") || "null"
-  );
+  const [organization, setOrganization] = useState<Organization | null>(null);
+
+  useEffect(() => {
+
+    let isMounted = true;
+
+    authRepository.getCurrentUser().then((currentUser) => {
+
+      if (!currentUser) {
+        return;
+      }
+
+      organizationRepository.getOrganizationByUser(currentUser.id).then((org) => {
+
+        if (isMounted) {
+          setOrganization(org);
+        }
+
+      });
+
+    });
+
+    return () => {
+      isMounted = false;
+    };
+
+  }, []);
 
   const settings = getSettings();
 
@@ -139,7 +166,7 @@ export default function Dashboard() {
             </p>
 
             <h2 className="text-2xl font-bold text-[#0a2540]">
-              {organization.companyName}
+              {organization.name}
             </h2>
 
           </div>

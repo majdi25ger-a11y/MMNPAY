@@ -81,7 +81,7 @@ export default function CreateOrganization() {
       return;
     }
 
-    const currentUser = authRepository.getCurrentUser();
+    const currentUser = await authRepository.getCurrentUser();
 
     if (!currentUser) {
       alert("You must be signed in to create an organization.");
