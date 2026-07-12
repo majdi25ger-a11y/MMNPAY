@@ -31,10 +31,10 @@ export default function Home() {
             <button onClick={toggleLang} className="text-sm font-bold text-[#425466] hover:text-[#0a2540]">
               {lang === 'en' ? 'AR' : 'EN'}
             </button>
-            <a href="#signin" className="text-sm font-semibold text-[#425466] hover:text-[#0a2540] transition-colors">
+            <Link href="/login" className="text-sm font-semibold text-[#425466] hover:text-[#0a2540] transition-colors">
               {t.navSignIn}
-            </a>
-            <Link href="/checkout" className="px-5 py-2 bg-[#635bff] hover:bg-[#0a2540] rounded-full text-white transition-all text-sm font-semibold flex items-center gap-2 group">
+            </Link>
+            <Link href="/register" className="px-5 py-2 bg-[#635bff] hover:bg-[#0a2540] rounded-full text-white transition-all text-sm font-semibold flex items-center gap-2 group">
               {t.navStartNow} <ArrowRight size={16} className={`transition-transform group-hover:translate-x-1 ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
             </Link>
           </div>
@@ -53,8 +53,8 @@ export default function Home() {
             <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>{t.navPricing}</a>
             <div className="h-px bg-gray-100 my-2"></div>
             <button onClick={() => { toggleLang(); setIsMobileMenuOpen(false); }} className="text-left rtl:text-right">{lang === 'en' ? 'Switch to Arabic' : 'Switch to English'}</button>
-            <a href="#signin" onClick={() => setIsMobileMenuOpen(false)}>{t.navSignIn}</a>
-            <Link href="/checkout" onClick={() => setIsMobileMenuOpen(false)} className="px-5 py-3 bg-[#635bff] text-white rounded-full text-center">
+            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>{t.navSignIn}</Link>
+            <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="px-5 py-3 bg-[#635bff] text-white rounded-full text-center">
               {t.navStartNow}
             </Link>
           </div>
