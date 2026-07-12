@@ -12,6 +12,9 @@ import Invoices from "@/pages/Invoices";
 import CreateInvoice from "@/pages/CreateInvoice";
 import EditInvoice from "@/pages/EditInvoice";
 import Settings from "@/pages/Settings";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/lib/language';
 
@@ -22,15 +25,50 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       <Route path="/pay/:id" component={Pay} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/transactions" component={Transactions} />
-      <Route path="/customers" component={Customers} />
-      <Route path="/invoices" component={Invoices} />
-      <Route path="/invoices/create" component={CreateInvoice} />
-      <Route path="/invoices/edit/:invoiceNumber" component={EditInvoice} />
-      <Route path="/settings" component={Settings} />
-      
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/transactions">
+        <ProtectedRoute>
+          <Transactions />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/customers">
+        <ProtectedRoute>
+          <Customers />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/invoices">
+        <ProtectedRoute>
+          <Invoices />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/invoices/create">
+        <ProtectedRoute>
+          <CreateInvoice />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/invoices/edit/:invoiceNumber">
+        <ProtectedRoute>
+          <EditInvoice />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/payment-links">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );
