@@ -5,7 +5,6 @@ import {
   savePayments,
   getTransactions,
   saveTransactions,
-  getInvoices,
   getSettings,
   saveSettings,
   savePaymentRecord
@@ -13,6 +12,8 @@ import {
 import * as authRepository from "@/lib/repositories/authRepository";
 import * as organizationRepository from "@/lib/repositories/organizationRepository";
 import type { Organization } from "@/lib/repositories/organizationRepository";
+import * as invoiceRepository from "@/lib/repositories/invoiceRepository";
+import type { Invoice } from "@/lib/repositories/invoiceRepository";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: "€",
@@ -23,6 +24,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 export default function Dashboard() {
 
   const [organization, setOrganization] = useState<Organization | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
 
@@ -36,9 +38,23 @@ export default function Dashboard() {
 
       organizationRepository.getOrganizationByUser(currentUser.id).then((org) => {
 
-        if (isMounted) {
-          setOrganization(org);
+        if (!isMounted) {
+          return;
         }
+
+        setOrganization(org);
+
+        if (!org) {
+          return;
+        }
+
+        invoiceRepository.getInvoicesByOrganization(org.id).then((orgInvoices) => {
+
+          if (isMounted) {
+            setInvoices(orgInvoices);
+          }
+
+        });
 
       });
 
@@ -72,8 +88,6 @@ export default function Dashboard() {
     0
   );
 
-  const invoices = getInvoices();
-
   const totalCustomers = new Set(
     transactions.map((item: any) => item.merchant)
   ).size;
@@ -81,15 +95,15 @@ export default function Dashboard() {
   const totalInvoices = invoices.length;
 
   const draftInvoices = invoices.filter(
-    (item: any) => item.status === "Draft"
+    (item) => item.status === "Draft"
   ).length;
 
   const sentInvoices = invoices.filter(
-    (item: any) => item.status === "Sent"
+    (item) => item.status === "Sent"
   ).length;
 
   const paidInvoices = invoices.filter(
-    (item: any) => item.status === "Paid"
+    (item) => item.status === "Paid"
   ).length;
 
   const filteredLinks = useMemo(() => {

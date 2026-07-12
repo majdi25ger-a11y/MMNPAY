@@ -1,37 +1,45 @@
 import { useLocation } from "wouter";
 import Sidebar from "@/components/Sidebar";
 import InvoiceForm, { InvoiceFormValues } from "@/components/InvoiceForm";
+import * as authRepository from "@/lib/repositories/authRepository";
+import * as organizationRepository from "@/lib/repositories/organizationRepository";
+import * as invoiceRepository from "@/lib/repositories/invoiceRepository";
 
 export default function CreateInvoice() {
 
   const [, navigate] = useLocation();
 
-  function saveInvoice(values: InvoiceFormValues) {
+  async function saveInvoice(values: InvoiceFormValues) {
+
+    const currentUser = await authRepository.getCurrentUser();
+
+    if (!currentUser) {
+      alert("You must be signed in to create an invoice.");
+      return;
+    }
+
+    const organization = await organizationRepository.getOrganizationByUser(
+      currentUser.id
+    );
+
+    if (!organization) {
+      alert("You must create an organization before adding invoices.");
+      return;
+    }
 
     const invoiceNumber = "INV" + Date.now();
 
-    const invoice = {
-      invoiceNumber,
-      customerName: values.customerName,
+    await invoiceRepository.createInvoice({
+      organization_id: organization.id,
+      invoice_number: invoiceNumber,
+      customer_name: values.customerName,
       email: values.email,
-      amount: values.amount,
+      amount: Number(values.amount) || 0,
       currency: values.currency,
       description: values.description,
-      dueDate: values.dueDate,
-      status: "Draft",
-      createdAt: new Date().toLocaleString()
-    };
-
-    const invoices = JSON.parse(
-      localStorage.getItem("invoices") || "[]"
-    );
-
-    invoices.unshift(invoice);
-
-    localStorage.setItem(
-      "invoices",
-      JSON.stringify(invoices)
-    );
+      due_date: values.dueDate,
+      status: "Draft"
+    });
 
     navigate("/invoices");
 

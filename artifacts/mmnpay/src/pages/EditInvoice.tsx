@@ -1,46 +1,94 @@
+import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
 import Sidebar from "@/components/Sidebar";
 import InvoiceForm, { InvoiceFormValues } from "@/components/InvoiceForm";
-
-function pick(...values: any[]) {
-
-  for (const value of values) {
-
-    if (value !== undefined && value !== null && value !== "") {
-      return value;
-    }
-
-  }
-
-  return undefined;
-
-}
-
-function getInvoiceNumber(item: any): string {
-
-  return pick(item.invoiceNumber, item.number, item.id) ?? "";
-
-}
+import * as authRepository from "@/lib/repositories/authRepository";
+import * as organizationRepository from "@/lib/repositories/organizationRepository";
+import * as invoiceRepository from "@/lib/repositories/invoiceRepository";
+import type { Invoice } from "@/lib/repositories/invoiceRepository";
 
 export default function EditInvoice() {
 
   const { invoiceNumber } = useParams();
   const [, navigate] = useLocation();
 
-  const invoices = JSON.parse(
-    localStorage.getItem("invoices") || "[]"
-  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
 
-  const rawInvoices = Array.isArray(invoices) ? invoices : [];
+  useEffect(() => {
 
-  const invoiceIndex = rawInvoices.findIndex(
-    (item: any) => String(getInvoiceNumber(item)) === String(invoiceNumber)
-  );
+    let isMounted = true;
 
-  const invoice = invoiceIndex >= 0 ? rawInvoices[invoiceIndex] : null;
+    async function load() {
+
+      const currentUser = await authRepository.getCurrentUser();
+
+      if (!currentUser) {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      const organization = await organizationRepository.getOrganizationByUser(
+        currentUser.id
+      );
+
+      if (!organization || !invoiceNumber) {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      const found = await invoiceRepository.getInvoiceByNumber(
+        organization.id,
+        invoiceNumber
+      );
+
+      if (isMounted) {
+        setInvoice(found);
+        setIsLoading(false);
+      }
+
+    }
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+
+  }, [invoiceNumber]);
 
   function cancel() {
     navigate("/invoices");
+  }
+
+  if (isLoading) {
+
+    return (
+
+      <div className="flex min-h-screen bg-[#f6f9fc]">
+
+        <Sidebar />
+
+        <main className="flex-1 p-8">
+
+          <div className="bg-white rounded-2xl shadow p-10 text-center max-w-2xl">
+
+            <p className="text-gray-500">
+              Loading invoice...
+            </p>
+
+          </div>
+
+        </main>
+
+      </div>
+
+    );
+
   }
 
   if (!invoice) {
@@ -81,38 +129,28 @@ export default function EditInvoice() {
   }
 
   const initialValues: Partial<InvoiceFormValues> = {
-    customerName: pick(invoice.customerName, invoice.customer, invoice.merchant, ""),
-    email: pick(invoice.email, ""),
-    amount: String(pick(invoice.amount, invoice.total, "")),
-    currency: pick(invoice.currency, "EUR"),
-    description: pick(invoice.description, ""),
-    dueDate: pick(invoice.dueDate, invoice.due_date, invoice.due, "")
+    customerName: invoice.customer_name || "",
+    email: invoice.email || "",
+    amount: String(invoice.amount ?? ""),
+    currency: invoice.currency || "EUR",
+    description: invoice.description || "",
+    dueDate: invoice.due_date || ""
   };
 
-  function saveInvoice(values: InvoiceFormValues) {
+  async function saveInvoice(values: InvoiceFormValues) {
 
-    const updatedInvoices = rawInvoices.map((item: any, index: number) => {
+    if (!invoice) {
+      return;
+    }
 
-      if (index !== invoiceIndex) {
-        return item;
-      }
-
-      return {
-        ...item,
-        customerName: values.customerName,
-        email: values.email,
-        amount: values.amount,
-        currency: values.currency,
-        description: values.description,
-        dueDate: values.dueDate
-      };
-
+    await invoiceRepository.updateInvoice(invoice.id, {
+      customer_name: values.customerName,
+      email: values.email,
+      amount: Number(values.amount) || 0,
+      currency: values.currency,
+      description: values.description,
+      due_date: values.dueDate
     });
-
-    localStorage.setItem(
-      "invoices",
-      JSON.stringify(updatedInvoices)
-    );
 
     navigate("/invoices");
 
@@ -131,7 +169,7 @@ export default function EditInvoice() {
         </h1>
 
         <p className="text-gray-500 mt-2 mb-8">
-          Update the details for {getInvoiceNumber(invoice)}.
+          Update the details for {invoice.invoice_number}.
         </p>
 
         <InvoiceForm

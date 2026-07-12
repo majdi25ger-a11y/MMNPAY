@@ -1,11 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/Sidebar";
 import { downloadInvoicePdf, printInvoice } from "@/lib/invoiceExport";
+import * as authRepository from "@/lib/repositories/authRepository";
+import * as organizationRepository from "@/lib/repositories/organizationRepository";
+import * as invoiceRepository from "@/lib/repositories/invoiceRepository";
+import type { Invoice as InvoiceRecord } from "@/lib/repositories/invoiceRepository";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
 interface Invoice {
+  id: string;
   invoiceNumber: string;
   customerName: string;
   amount: number;
@@ -22,30 +27,17 @@ const STATUS_STYLES: Record<string, string> = {
   Overdue: "bg-red-100 text-red-700"
 };
 
-function pick(...values: any[]) {
-
-  for (const value of values) {
-
-    if (value !== undefined && value !== null && value !== "") {
-      return value;
-    }
-
-  }
-
-  return undefined;
-
-}
-
-function normalizeInvoice(item: any): Invoice {
+function normalizeInvoice(item: InvoiceRecord): Invoice {
 
   return {
-    invoiceNumber: pick(item.invoiceNumber, item.number, item.id) ?? "",
-    customerName: pick(item.customerName, item.customer, item.merchant) ?? "",
-    amount: Number(pick(item.amount, item.total, 0)),
-    currency: pick(item.currency, "EUR"),
-    description: pick(item.description, "") ?? "",
-    status: (pick(item.status, "Draft") as InvoiceStatus),
-    dueDate: pick(item.dueDate, item.due_date, item.due) ?? ""
+    id: item.id,
+    invoiceNumber: item.invoice_number || "",
+    customerName: item.customer_name || "",
+    amount: Number(item.amount) || 0,
+    currency: item.currency || "EUR",
+    description: item.description || "",
+    status: (item.status as InvoiceStatus) || "Draft",
+    dueDate: item.due_date || ""
   };
 
 }
@@ -56,21 +48,63 @@ export default function Invoices() {
 
   const [search, setSearch] = useState("");
 
-  const [rawInvoices, setRawInvoices] = useState<any[]>(() => {
+  const [isLoading, setIsLoading] = useState(true);
 
-    const raw = JSON.parse(
-      localStorage.getItem("invoices") || "[]"
-    );
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
-    return Array.isArray(raw) ? raw : [];
-
-  });
+  const [rawInvoices, setRawInvoices] = useState<InvoiceRecord[]>([]);
 
   const [paymentLinks, setPaymentLinks] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+
+    let isMounted = true;
+
+    async function load() {
+
+      const currentUser = await authRepository.getCurrentUser();
+
+      if (!currentUser) {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      const organization = await organizationRepository.getOrganizationByUser(
+        currentUser.id
+      );
+
+      if (!organization) {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      const invoices = await invoiceRepository.getInvoicesByOrganization(
+        organization.id
+      );
+
+      if (isMounted) {
+        setOrganizationId(organization.id);
+        setRawInvoices(invoices);
+        setIsLoading(false);
+      }
+
+    }
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+
+  }, []);
+
   const invoices: Invoice[] = useMemo(() => {
 
-    return rawInvoices.map((item: any) => normalizeInvoice(item));
+    return rawInvoices.map((item) => normalizeInvoice(item));
 
   }, [rawInvoices]);
 
@@ -87,7 +121,7 @@ export default function Invoices() {
 
   }, [invoices, search]);
 
-  function generatePaymentLink(invoice: Invoice, index: number) {
+  async function generatePaymentLink(invoice: Invoice) {
 
     const paymentId = "MMN" + Date.now();
 
@@ -118,24 +152,12 @@ export default function Invoices() {
       JSON.stringify(payments)
     );
 
-    const updatedRawInvoices = rawInvoices.map((item, i) => {
-
-      if (i !== index) {
-        return item;
-      }
-
-      return {
-        ...item,
-        status: "Sent"
-      };
-
+    const updated = await invoiceRepository.updateInvoice(invoice.id, {
+      status: "Sent"
     });
 
-    setRawInvoices(updatedRawInvoices);
-
-    localStorage.setItem(
-      "invoices",
-      JSON.stringify(updatedRawInvoices)
+    setRawInvoices((prev) =>
+      prev.map((item) => (item.id === invoice.id ? updated : item))
     );
 
     setPaymentLinks((prev) => ({
@@ -151,7 +173,7 @@ export default function Invoices() {
 
   }
 
-  function deleteInvoice(index: number) {
+  async function deleteInvoice(invoice: Invoice) {
 
     const confirmed = window.confirm(
       "Are you sure you want to delete this invoice?"
@@ -161,14 +183,9 @@ export default function Invoices() {
       return;
     }
 
-    const updatedRawInvoices = rawInvoices.filter((_, i) => i !== index);
+    await invoiceRepository.deleteInvoice(invoice.id);
 
-    setRawInvoices(updatedRawInvoices);
-
-    localStorage.setItem(
-      "invoices",
-      JSON.stringify(updatedRawInvoices)
-    );
+    setRawInvoices((prev) => prev.filter((item) => item.id !== invoice.id));
 
   }
 
@@ -216,7 +233,17 @@ export default function Invoices() {
 
           </div>
 
-          {invoices.length === 0 ? (
+          {isLoading ? (
+
+            <div className="text-center py-16">
+
+              <p className="text-gray-500">
+                Loading invoices...
+              </p>
+
+            </div>
+
+          ) : invoices.length === 0 ? (
 
             <div className="text-center py-16">
 
@@ -251,16 +278,12 @@ export default function Invoices() {
 
               {filteredInvoices.map((invoice) => {
 
-                const rawIndex = rawInvoices.findIndex(
-                  (item) => normalizeInvoice(item).invoiceNumber === invoice.invoiceNumber
-                );
-
                 const link = paymentLinks[invoice.invoiceNumber];
 
                 return (
 
                   <div
-                    key={invoice.invoiceNumber || rawIndex}
+                    key={invoice.id}
                     className="border rounded-2xl p-5 flex flex-col gap-3"
                   >
 
@@ -331,7 +354,7 @@ export default function Invoices() {
                     {invoice.status === "Draft" && (
 
                       <button
-                        onClick={() => generatePaymentLink(invoice, rawIndex)}
+                        onClick={() => generatePaymentLink(invoice)}
                         className="w-full bg-[#635bff] text-white py-3 rounded-xl font-bold mt-1"
                       >
                         Generate Payment Link
@@ -379,7 +402,7 @@ export default function Invoices() {
                       </button>
 
                       <button
-                        onClick={() => deleteInvoice(rawIndex)}
+                        onClick={() => deleteInvoice(invoice)}
                         className="flex-1 border border-red-200 text-red-600 py-2 rounded-xl font-bold"
                       >
                         Delete

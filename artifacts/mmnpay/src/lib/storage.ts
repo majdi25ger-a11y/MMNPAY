@@ -17,26 +17,6 @@ export interface Payment {
   [key: string]: unknown;
 }
 
-export interface Invoice {
-  invoiceNumber?: string;
-  number?: string;
-  id?: string;
-  customerName?: string;
-  customer?: string;
-  merchant?: string;
-  email?: string;
-  amount?: number | string;
-  total?: number | string;
-  currency?: string;
-  description?: string;
-  status?: string;
-  dueDate?: string;
-  due_date?: string;
-  due?: string;
-  createdAt?: string;
-  [key: string]: unknown;
-}
-
 export interface Transaction {
   id: number | string;
   paymentId?: string;
@@ -88,7 +68,6 @@ const DEFAULT_SETTINGS: CompanySettings = {
 
 const KEYS = {
   payments: "payments",
-  invoices: "invoices",
   transactions: "transactions",
   settings: "settings"
 } as const;
@@ -203,16 +182,6 @@ export function getPaymentById(id: string): Payment | null {
 
 export function savePaymentRecord(payment: Payment): void {
   writeObject<Payment>("payment_" + payment.id, payment);
-}
-
-// ---- Invoices ----
-
-export function getInvoices(): Invoice[] {
-  return readArray<Invoice>(KEYS.invoices);
-}
-
-export function saveInvoices(invoices: Invoice[]): void {
-  writeArray<Invoice>(KEYS.invoices, invoices);
 }
 
 // ---- Transactions ----
