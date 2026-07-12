@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
+import * as authRepository from "@/lib/repositories/authRepository";
 
 interface RegisterForm {
   fullName: string;
@@ -16,8 +18,11 @@ const DEFAULT_FORM: RegisterForm = {
 
 export default function Register() {
 
+  const [, navigate] = useLocation();
+
   const [form, setForm] = useState<RegisterForm>(DEFAULT_FORM);
   const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState("");
 
   function update<K extends keyof RegisterForm>(key: K, value: RegisterForm[K]) {
 
@@ -25,6 +30,33 @@ export default function Register() {
       ...prev,
       [key]: value
     }));
+
+  }
+
+  function handleCreateAccount() {
+
+    setError("");
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+
+      authRepository.register({
+        fullName: form.fullName,
+        email: form.email,
+        password: form.password
+      });
+
+      navigate("/login");
+
+    } catch (err) {
+
+      setError(err instanceof Error ? err.message : "Unable to create account.");
+
+    }
 
   }
 
@@ -118,8 +150,15 @@ export default function Register() {
 
           </label>
 
+          {error && (
+            <p className="text-red-600 text-sm mb-4">
+              {error}
+            </p>
+          )}
+
           <button
             disabled={!agreed}
+            onClick={handleCreateAccount}
             className={`w-full py-4 rounded-xl font-bold text-white ${
               agreed ? "bg-[#635bff]" : "bg-gray-300 cursor-not-allowed"
             }`}
