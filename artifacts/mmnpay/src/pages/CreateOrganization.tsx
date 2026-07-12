@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import * as authRepository from "@/lib/repositories/authRepository";
+import * as organizationRepository from "@/lib/repositories/organizationRepository";
 
 const COUNTRIES = [
   "United States",
@@ -54,15 +56,12 @@ const DEFAULT_FORM: OrganizationForm = {
   timezone: TIMEZONES[0]
 };
 
-function generateOrganizationId(): string {
-  return "ORG" + Date.now();
-}
-
 export default function CreateOrganization() {
 
   const [, navigate] = useLocation();
   const [form, setForm] = useState<OrganizationForm>(DEFAULT_FORM);
   const [created, setCreated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function update<K extends keyof OrganizationForm>(key: K, value: OrganizationForm[K]) {
 
@@ -75,55 +74,55 @@ export default function CreateOrganization() {
 
   }
 
-  function createOrganization() {
+  async function createOrganization() {
 
     if (!form.companyName || !form.ownerName || !form.businessEmail) {
       alert("Please fill in Company Name, Owner Name and Business Email");
       return;
     }
 
-    const organization = {
-      ...form,
-      organizationId: generateOrganizationId(),
-      createdAt: new Date().toLocaleString(),
-      plan: "Starter"
-    };
+    const currentUser = authRepository.getCurrentUser();
 
-    localStorage.setItem(
-      "organization",
-      JSON.stringify(organization)
-    );
-
-    const existingSettings = localStorage.getItem("settings");
-
-    if (!existingSettings) {
-
-      const defaultSettings = {
-        companyName: form.companyName,
-        email: form.businessEmail,
-        phone: "",
-        website: "",
-        address: "",
-        logoUrl: "",
-        primaryColor: "#635bff",
-        defaultCurrency: form.defaultCurrency,
-        defaultDescription: "",
-        vatEnabled: false,
-        vatPercentage: ""
-      };
-
-      localStorage.setItem(
-        "settings",
-        JSON.stringify(defaultSettings)
-      );
-
+    if (!currentUser) {
+      alert("You must be signed in to create an organization.");
+      return;
     }
 
-    setCreated(true);
+    setIsSubmitting(true);
 
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 1200);
+    try {
+
+      await organizationRepository.createOrganization({
+        owner_id: currentUser.id,
+        name: form.companyName,
+        owner_name: form.ownerName,
+        email: form.businessEmail,
+        phone: form.phone,
+        country: form.country,
+        currency: form.defaultCurrency,
+        timezone: form.timezone,
+        plan: "Starter"
+      });
+
+      setCreated(true);
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1200);
+
+    } catch (error) {
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to create organization. Please try again."
+      );
+
+    } finally {
+
+      setIsSubmitting(false);
+
+    }
 
   }
 
