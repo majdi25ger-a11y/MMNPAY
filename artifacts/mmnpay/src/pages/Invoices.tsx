@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/Sidebar";
+import { downloadInvoicePdf, printInvoice } from "@/lib/invoiceExport";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -382,6 +383,24 @@ export default function Invoices() {
                         className="flex-1 border border-red-200 text-red-600 py-2 rounded-xl font-bold"
                       >
                         Delete
+                      </button>
+
+                    </div>
+
+                    <div className="flex gap-3">
+
+                      <button
+                        onClick={() => downloadInvoicePdf(invoice)}
+                        className="flex-1 border border-gray-200 text-[#0a2540] py-2 rounded-xl font-bold"
+                      >
+                        Download PDF
+                      </button>
+
+                      <button
+                        onClick={() => printInvoice(invoice)}
+                        className="flex-1 border border-gray-200 text-[#0a2540] py-2 rounded-xl font-bold"
+                      >
+                        Print
                       </button>
 
                     </div>
