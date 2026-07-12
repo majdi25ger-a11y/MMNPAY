@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/Sidebar";
 import { downloadInvoicePdf, printInvoice } from "@/lib/invoiceExport";
+import type { ExportableOrganization } from "@/lib/invoiceExport";
+import { APP_NAME } from "@/lib/config";
 import * as authRepository from "@/lib/repositories/authRepository";
 import * as organizationRepository from "@/lib/repositories/organizationRepository";
+import type { Organization } from "@/lib/repositories/organizationRepository";
 import * as invoiceRepository from "@/lib/repositories/invoiceRepository";
 import type { Invoice as InvoiceRecord } from "@/lib/repositories/invoiceRepository";
 
@@ -13,11 +16,26 @@ interface Invoice {
   id: string;
   invoiceNumber: string;
   customerName: string;
+  customerEmail: string;
   amount: number;
   currency: string;
   description: string;
   status: InvoiceStatus;
+  issueDate: string;
   dueDate: string;
+}
+
+// Builds the organization shape the PDF/print service expects, falling
+// back to MMNPAY defaults if the organization hasn't loaded yet.
+function toPdfOrganization(organization: Organization | null): ExportableOrganization {
+
+  return {
+    name: organization?.name || APP_NAME,
+    email: organization?.email || undefined,
+    phone: organization?.phone || undefined,
+    country: organization?.country || undefined
+  };
+
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -33,10 +51,12 @@ function normalizeInvoice(item: InvoiceRecord): Invoice {
     id: item.id,
     invoiceNumber: item.invoice_number || "",
     customerName: item.customer_name || "",
+    customerEmail: item.email || "",
     amount: Number(item.amount) || 0,
     currency: item.currency || "EUR",
     description: item.description || "",
     status: (item.status as InvoiceStatus) || "Draft",
+    issueDate: (item.created_at || "").slice(0, 10),
     dueDate: item.due_date || ""
   };
 
@@ -50,7 +70,7 @@ export default function Invoices() {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
 
   const [rawInvoices, setRawInvoices] = useState<InvoiceRecord[]>([]);
 
@@ -87,7 +107,7 @@ export default function Invoices() {
       );
 
       if (isMounted) {
-        setOrganizationId(organization.id);
+        setOrganization(organization);
         setRawInvoices(invoices);
         setIsLoading(false);
       }
@@ -413,14 +433,14 @@ export default function Invoices() {
                     <div className="flex gap-3">
 
                       <button
-                        onClick={() => downloadInvoicePdf(invoice)}
+                        onClick={() => downloadInvoicePdf(invoice, toPdfOrganization(organization))}
                         className="flex-1 border border-gray-200 text-[#0a2540] py-2 rounded-xl font-bold"
                       >
                         Download PDF
                       </button>
 
                       <button
-                        onClick={() => printInvoice(invoice)}
+                        onClick={() => printInvoice(invoice, toPdfOrganization(organization))}
                         className="flex-1 border border-gray-200 text-[#0a2540] py-2 rounded-xl font-bold"
                       >
                         Print
