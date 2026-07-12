@@ -79,7 +79,7 @@ export default function Home() {
               {t.heroSub}
             </p>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <Link href="/checkout" className="px-8 py-4 bg-[#635bff] hover:bg-[#0a2540] text-white rounded-full font-bold transition-all text-lg w-full sm:w-auto text-center flex justify-center items-center gap-2 group">
+              <Link href="/register" className="px-8 py-4 bg-[#635bff] hover:bg-[#0a2540] text-white rounded-full font-bold transition-all text-lg w-full sm:w-auto text-center flex justify-center items-center gap-2 group">
                 {t.heroCtaPrimary}
                 <ArrowRight size={20} className={`transition-transform group-hover:translate-x-1 ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
               </Link>
@@ -248,7 +248,7 @@ export default function Home() {
             <p className="text-xl text-[#425466] mb-10 max-w-md">
               {t.merchantSub}
             </p>
-            <Link href="/checkout" className="inline-flex items-center gap-2 px-8 py-4 bg-[#f6f9fc] hover:bg-[#635bff] text-[#0a2540] hover:text-white rounded-full font-bold transition-all hover:shadow-lg border border-gray-200 hover:border-transparent group">
+            <Link href="/register" className="inline-flex items-center gap-2 px-8 py-4 bg-[#f6f9fc] hover:bg-[#635bff] text-[#0a2540] hover:text-white rounded-full font-bold transition-all hover:shadow-lg border border-gray-200 hover:border-transparent group">
               {t.navStartNow}
               <ArrowRight size={18} className={`transition-transform group-hover:translate-x-1 ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
             </Link>
@@ -420,7 +420,7 @@ export default function Home() {
                 ))}
               </ul>
 
-              <Link href="/checkout" className="block w-full py-4 bg-[#635bff] hover:bg-[#0a2540] text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-[#635bff]/25">
+              <Link href="/register" className="block w-full py-4 bg-[#635bff] hover:bg-[#0a2540] text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-[#635bff]/25">
                 {t.pricingGetStarted}
               </Link>
             </div>
@@ -439,7 +439,7 @@ export default function Home() {
             {t.startBuilding}
           </h2>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="/checkout" className="px-8 py-4 bg-white text-[#0a2540] rounded-full font-bold text-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+            <Link href="/register" className="px-8 py-4 bg-white text-[#0a2540] rounded-full font-bold text-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
               {t.createAccount}
             </Link>
             <button className="px-8 py-4 bg-transparent border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all">
